@@ -76,8 +76,8 @@ class ClientController extends Controller
             'contact_number' => 'required|min:2',
             'email_address' => 'required|email|min:2',
             'maintenance' => 'required|min:2',
-            // 'signature' => 'required|min:2',
-            // 'image' => 'required|min:2',
+            'signature' => 'required|min:5',
+            'image' => 'required|min:5',
         ]);
 
         $errors = $validator->errors();
