@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\NurseAttController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,9 +23,12 @@ use App\Http\Controllers\ClientController;
 
 Route::post('signin', [AuthController::class, 'signin'])->name('login');
 Route::post('new_user', [AuthController::class, 'add_user']);
+Route::post('signout', [AuthController::class, 'signout']);
 
 Route::middleware('auth:api')->group(function () {
+    Route::post('validate', [AuthController::class, 'validate_token']);
     Route::resource('client', ClientController::class);
+    Route::resource('nurse_attendant', NurseAttController::class);
 });
 
 //invalid access

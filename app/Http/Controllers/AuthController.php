@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 
+use Laravel\Passport\TokenRepository;
+use Laravel\Passport\RefreshTokenRepository;
+
 class AuthController extends Controller
 {
     //
@@ -23,7 +26,7 @@ class AuthController extends Controller
                 "userId" => $userId,
             ]);
         } else {
-            return reponse()->json([
+            return response()->json([
                 "success" => false,
                 "message" => "Unauthorized"
             ], 401);
@@ -54,5 +57,47 @@ class AuthController extends Controller
             "message" => "User successfully saved",
             "token" => $token
         ], 200);
+    }
+
+    //signout the user
+    public function signout(Request $request) {
+        //get the tokens
+        $tokenRepository = app(TokenRepository::class);
+        //check the status of the user if logged in or not
+        $is_logged_in = auth()->guard('api')->check();
+        //get token of the user
+        $token = auth()->user()->token();    
+        
+        //check if the user is logged in and revoke the token login access
+        if ($is_logged_in) {
+            $request->user()->token()->revoke();
+            return response()->json([
+                'success' => true,
+                'message' => 'Token access revoked',
+            ], 200);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not allowed'
+            ], 401);
+        }
+    }
+
+    public function validate_token(Request $request) {
+        $is_logged_in = auth()->guard('api')->check();
+
+        if ($is_logged_in) {
+            $userId = auth()->user();
+            return response()->json([
+                'success' => true,
+                'message' => 'Token have access',
+                'userId' => $request->user()->id
+            ], 200);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your token have no access'
+            ], 401);
+        }
     }
 }

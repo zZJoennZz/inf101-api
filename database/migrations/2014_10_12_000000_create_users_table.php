@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('password');
             $table->rememberToken();
             $table->integer('is_active')->default('1');
+            $table->integer('is_admin')->default('0');
             $table->timestamps();
         });
     }

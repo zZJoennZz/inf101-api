@@ -18,10 +18,21 @@ class ClientController extends Controller
                 "message" => "NO clients found"
             ], 400);
         }
+        $data = array();
 
+        foreach($clients as $client) {
+            array_push($data, [
+                "first_name" => $client->first_name,
+                "middle_name" => $client->middle_name,
+                "last_name" => $client->last_name,
+                "image" => $client->image,
+                "client_id" => $client->client_id,
+                "id" => $client->id,
+            ]);
+        }
         return response()->json([
             "success" => true,
-            "data" => $clients
+            "data" => $data
         ], 200);
     }
 
@@ -65,8 +76,8 @@ class ClientController extends Controller
             'contact_number' => 'required|min:2',
             'email_address' => 'required|email|min:2',
             'maintenance' => 'required|min:2',
-            'signature' => 'required|min:2',
-            'image' => 'required|min:2',
+            // 'signature' => 'required|min:2',
+            // 'image' => 'required|min:2',
         ]);
 
         $errors = $validator->errors();
