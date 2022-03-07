@@ -1,5 +1,7 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/shift101/api.shift101.solutions/v1
-    - /bin/cp index.html $DEPLOYPATH
-    - /bin/cp style.css $DEPLOYPATH
+    - /bin/cp -r * $DEPLOYPATH #copy all from root
+    #    - /bin/cp -r ./public/* $DEPLOYPATH/public_html/
+    - /bin/cp ./public/js/*.js $DEPLOYPATH/js
+    - /bin/cp ./public/css/*.css $DEPLOYPATH/css
