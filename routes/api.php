@@ -22,7 +22,7 @@ use App\Http\Controllers\NurseAttController;
 // });
 
 Route::post('signin', [AuthController::class, 'signin'])->name('login');
-Route::post('new_user', [AuthController::class, 'add_user']);
+Route::post('newuser', [AuthController::class, 'add_user']);
 Route::post('signout', [AuthController::class, 'signout']);
 
 Route::middleware('auth:api')->group(function () {

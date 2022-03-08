@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 
 use Laravel\Passport\TokenRepository;
@@ -34,13 +35,22 @@ class AuthController extends Controller
     }
 
     public function add_user(Request $request) {
-        $this->validate($request, [
+        $validator = Validator::make($request->all(), [
             'first_name' => 'min:2',
             'last_name' => 'min:2',
             'email' => 'required|email',
             'username' => 'required|min:6',
             'password' => 'required|min:4',
         ]);
+
+        $errors = $validator->errors();
+
+         if ($validator->fails()) {
+            return response()->json([
+                "success" => false,
+                "errors" => $errors 
+            ], 400);
+        }
 
         $user = User::create([
             'first_name' => $request->first_name,
