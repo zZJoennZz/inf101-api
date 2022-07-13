@@ -9,7 +9,8 @@ use App\Models\Client;
 class ClientController extends Controller
 {
     //
-    public function index() {
+    public function index()
+    {
         $clients = Client::all();
 
         if (json_encode($clients) === json_encode([])) {
@@ -20,7 +21,7 @@ class ClientController extends Controller
         }
         $data = array();
 
-        foreach($clients as $client) {
+        foreach ($clients as $client) {
             array_push($data, [
                 "first_name" => $client->first_name,
                 "middle_name" => $client->middle_name,
@@ -36,9 +37,10 @@ class ClientController extends Controller
         ], 200);
     }
 
-    public function show($id) {
+    public function show($id)
+    {
         $client = Client::find($id);
-        
+
         if (json_encode($client) === json_encode([]) || is_null($client)) {
             return response()->json([
                 "success" => false,
@@ -52,40 +54,40 @@ class ClientController extends Controller
         ], 200);
     }
 
-    public function store(Request $request) {
-        $client = Client::orderBy('id', 'desc')->first(); 
-        $clientId;
+    public function store(Request $request)
+    {
+        $client = Client::orderBy('id', 'desc')->first();
         if (is_null($client)) {
             $clientId = "101-01";
         } else {
             $clientId = $client->id >= 10 ? "101-" . $client->id + 1 : "101-0" . $client->id + 1;
         }
-
+        $field_req = 'required|min:2';
         $validator = Validator::make($request->all(), [
-            'first_name' => 'required|min:2',
-            'middle_name' => 'required|min:2',
-            'last_name' => 'required|min:2',
+            'first_name' => $field_req,
+            'middle_name' => $field_req,
+            'last_name' => $field_req,
             'gender' => 'required',
             'birthday' => 'required|date',
             'address' => 'required|min:3',
-            'barangay' => 'required|min:2',
-            'city' => 'required|min:2',
-            'province' => 'required|min:2',
-            'region' => 'required|min:2',
-            'zip_code' => 'required|min:2',
-            'contact_number' => 'required|min:2',
+            'barangay' => $field_req,
+            'city' => $field_req,
+            'province' => $field_req,
+            'region' => $field_req,
+            'zip_code' => $field_req,
+            'contact_number' => $field_req,
             'email_address' => 'required|email|min:2',
-            'maintenance' => 'required|min:2',
+            'maintenance' => $field_req,
             'signature' => 'required|min:5',
             'image' => 'required|min:5',
         ]);
 
         $errors = $validator->errors();
-        
+
         if ($validator->fails()) {
             return response()->json([
                 "success" => false,
-                "errors" => $errors 
+                "errors" => $errors
             ], 400);
         }
 
@@ -125,7 +127,8 @@ class ClientController extends Controller
         }
     }
 
-    public function update(Request $request, $id) {
+    public function update(Request $request, $id)
+    {
         $client = Client::find($id);
 
         if (is_null($client)) {
@@ -150,7 +153,8 @@ class ClientController extends Controller
         }
     }
 
-    public function destroy($id) {
+    public function destroy($id)
+    {
         $client = Client::find($id);
 
         if (is_null($client)) {
@@ -173,13 +177,23 @@ class ClientController extends Controller
         }
     }
 
-    public function edit($id)
+    public function search_client(Request $request)
     {
-        //
-    }
+        $search_query = $request->search_query;
 
-    public function create()
-    {
-        //
+        $search_result = Client::where('client_id', 'LIKE', '%' . $search_query . '%')->orWhere('first_name', 'LIKE', '%' . $search_query . '%')->orWhere('middle_name', 'LIKE', '%' . $search_query . '%')->orWhere('last_name', 'LIKE', '%' . $search_query . '%')->limit(5)->select('id', 'client_id', 'first_name', 'middle_name', 'last_name', 'suffix')->get();
+
+        if (count($search_result) > 5) {
+            return response()->json([
+                "success" => true,
+                "message" => "Only 5 results. Please enter more specific information.",
+                "data" => $search_result
+            ], 200);
+        }
+
+        return response()->json([
+            "success" => true,
+            "data" => $search_result
+        ], 200);
     }
 }
