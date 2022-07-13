@@ -5,6 +5,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\NurseAttController;
+use App\Http\Controllers\DiscountController;
+use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\VisitController;
+use App\Http\Controllers\VisitTypeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,22 +21,24 @@ use App\Http\Controllers\NurseAttController;
 |
 */
 
-// Route::middleware('auth:api')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
-
 Route::post('signin', [AuthController::class, 'signin'])->name('login');
 Route::post('newuser', [AuthController::class, 'add_user']);
 Route::post('signout', [AuthController::class, 'signout']);
 
 Route::middleware('auth:api')->group(function () {
+    Route::get('users_list', [AuthController::class, 'get_all']);
     Route::post('validate', [AuthController::class, 'validate_token']);
+    Route::post('search_client', [ClientController::class, 'search_client']);
     Route::resource('client', ClientController::class);
     Route::resource('nurse_attendant', NurseAttController::class);
+    Route::resource('discount', DiscountController::class);
+    Route::resource('service', ServiceController::class);
+    Route::resource('visit_type', VisitTypeController::class);
+    Route::resource('visit', VisitController::class);
 });
 
 //invalid access
-Route::get('invalid', function() {
+Route::get('invalid', function () {
     return response()->json([
         'success' => false,
         'message' => "Invalid access"
