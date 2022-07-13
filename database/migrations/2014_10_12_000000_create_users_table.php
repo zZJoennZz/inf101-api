@@ -24,6 +24,7 @@ return new class extends Migration
             $table->rememberToken();
             $table->integer('is_active')->default('1');
             $table->integer('is_admin')->default('0');
+            $table->string('account_type')->default('hd');
             $table->timestamps();
         });
     }
