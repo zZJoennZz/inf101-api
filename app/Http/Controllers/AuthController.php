@@ -11,8 +11,27 @@ use Laravel\Passport\RefreshTokenRepository;
 
 class AuthController extends Controller
 {
+
+    public function get_all()
+    {
+        $users = User::select('first_name', 'last_name', 'id', 'created_at', 'updated_at')->get();
+
+        if (count($users) === 0) {
+            return response()->json([
+                "success" => false,
+                "message" => "No users found"
+            ], 200);
+        } else {
+            return response()->json([
+                "success" => true,
+                "data" => $users
+            ], 200);
+        }
+    }
+
     //
-    public function signin(Request $request) {
+    public function signin(Request $request)
+    {
         $data = [
             'username' => $request->username,
             'password' => $request->password,
@@ -34,7 +53,8 @@ class AuthController extends Controller
         }
     }
 
-    public function add_user(Request $request) {
+    public function add_user(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'first_name' => 'min:2',
             'last_name' => 'min:2',
@@ -45,10 +65,10 @@ class AuthController extends Controller
 
         $errors = $validator->errors();
 
-         if ($validator->fails()) {
+        if ($validator->fails()) {
             return response()->json([
                 "success" => false,
-                "errors" => $errors 
+                "errors" => $errors
             ], 400);
         }
 
@@ -70,14 +90,15 @@ class AuthController extends Controller
     }
 
     //signout the user
-    public function signout(Request $request) {
+    public function signout(Request $request)
+    {
         //get the tokens
-        $tokenRepository = app(TokenRepository::class);
+        //$tokenRepository = app(TokenRepository::class);
         //check the status of the user if logged in or not
         $is_logged_in = auth()->guard('api')->check();
         //get token of the user
-        $token = auth()->user()->token();    
-        
+        //$token = auth()->user()->token();    
+
         //check if the user is logged in and revoke the token login access
         if ($is_logged_in) {
             $request->user()->token()->revoke();
@@ -93,11 +114,11 @@ class AuthController extends Controller
         }
     }
 
-    public function validate_token(Request $request) {
+    public function validate_token(Request $request)
+    {
         $is_logged_in = auth()->guard('api')->check();
 
         if ($is_logged_in) {
-            $userId = auth()->user();
             return response()->json([
                 'success' => true,
                 'message' => 'Token have access',
