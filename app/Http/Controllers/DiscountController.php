@@ -89,7 +89,7 @@ class DiscountController extends Controller
     public function update(Request $request, Discount $discount)
     {
         //
-        $val_req = "required|min:3";
+        $val_req = "required";
         $this->validate($request, [
             "discount_name" => $val_req,
             "discount_type" => $val_req,

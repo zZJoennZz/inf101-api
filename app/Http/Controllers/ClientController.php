@@ -11,7 +11,7 @@ class ClientController extends Controller
     //
     public function index()
     {
-        $clients = Client::all();
+        $clients = Client::select('first_name', 'middle_name', 'last_name', 'client_id', 'id', 'image')->get();
 
         if (json_encode($clients) === json_encode([])) {
             return response()->json([
