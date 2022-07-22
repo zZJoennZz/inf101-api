@@ -23,9 +23,9 @@ use App\Http\Controllers\VisitTypeController;
 
 Route::post('signin', [AuthController::class, 'signin'])->name('login');
 Route::post('newuser', [AuthController::class, 'add_user']);
-Route::post('signout', [AuthController::class, 'signout']);
 
 Route::middleware('auth:api')->group(function () {
+    Route::post('signout', [AuthController::class, 'signout']);
     Route::get('users_list', [AuthController::class, 'get_all']);
     Route::post('validate', [AuthController::class, 'validate_token']);
     Route::post('search_client', [ClientController::class, 'search_client']);

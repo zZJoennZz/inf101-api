@@ -44,6 +44,7 @@ class AuthController extends Controller
                 "success" => true,
                 "token" => $token,
                 "userId" => $userId,
+                "username" => $data['username'],
             ]);
         } else {
             return response()->json([
