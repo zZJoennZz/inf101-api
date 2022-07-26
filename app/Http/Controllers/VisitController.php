@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Visit;
 use App\Models\Discount;
 use App\Models\Service;
+use App\Models\ServiceReportConfiguration;
+use App\Models\ServiceReportRecord;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -124,18 +126,30 @@ class VisitController extends Controller
             ->leftJoin('users as hd', 'visits.hd_representative', '=', 'hd.id')
             ->leftJoin('users as wc', 'visits.wc_representative', '=', 'wc.id')
             ->where('visits.id', '=', $visit->id)
-            ->select('visits.*', 'clients.first_name', 'clients.middle_name', 'clients.last_name', 'clients.client_id', 'visit_types.type_name', 'discounts.discount_name', 'discounts.discount_type', 'discounts.discount_amount as discount_discount_amount', 'hd.first_name as hd_first_name', 'hd.last_name as hd_last_name', 'wc.first_name as wc_first_name', 'wc.last_name as wc_last_name', 'clients.image')
+            ->select('visits.*', 'clients.id as client', 'clients.first_name', 'clients.middle_name', 'clients.last_name', 'clients.client_id', 'visit_types.type_name', 'discounts.discount_name', 'discounts.discount_type', 'discounts.discount_amount as discount_discount_amount', 'hd.first_name as hd_first_name', 'hd.last_name as hd_last_name', 'wc.first_name as wc_first_name', 'wc.last_name as wc_last_name', 'clients.image')
             ->get();
 
-        if (count($visit_detail) === 0) {
+        if (count($visit_detail) <= 0) {
             return response()->json([
                 "success" => false,
                 "message" => "No visits found"
             ], 200);
         } else {
+            $service_report = json_decode($visit_detail[0]->service_id);
+
+            $get_service_reports = ServiceReportConfiguration::orWhere(function ($query) use ($service_report) {
+                foreach ($service_report as $sr) {
+                    $query->orWhere("service_report_configurations.service_id", "=", $sr);
+                }
+            })
+                ->leftJoin('service_reports as sr', 'sr.id', '=', 'service_report_configurations.service_report_id')
+                ->select('service_report_configurations.*', 'sr.form_name', 'sr.report_name', 'service_report_configurations.service_report_id')
+                ->get();
+
             return response()->json([
                 "success" => true,
-                "data" => $visit_detail
+                "data" => $visit_detail,
+                "reports" => $get_service_reports
             ], 200);
         }
     }
