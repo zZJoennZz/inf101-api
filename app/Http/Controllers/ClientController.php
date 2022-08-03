@@ -56,12 +56,38 @@ class ClientController extends Controller
 
     public function store(Request $request)
     {
+        if (!$request->hasFile('sig')) {
+            return response()->json([
+                "success" => false,
+                "message" => "No signature image attached"
+            ], 400);
+        }
+
+        if (!$request->hasFile('image')) {
+            return response()->json([
+                "success" => false,
+                "message" => "No client image attached"
+            ], 400);
+        }
+
+        $sigStorePath = "public/uploads/sig";
+        $imgStorePath = "public/uploads/img";
+
+        $get_sig = $request->file('sig');
+        $get_img = $request->file('image');
+
         $client = Client::orderBy('id', 'desc')->first();
+        $clientId = "";
         if (is_null($client)) {
             $clientId = "101-01";
         } else {
             $clientId = $client->id >= 10 ? "101-" . $client->id + 1 : "101-0" . $client->id + 1;
         }
+        $get_sig->storeAs($sigStorePath, $clientId . $get_sig->getClientOriginalName());
+        $get_img->storeAs($imgStorePath, $clientId . $get_img->getClientOriginalName());
+        $sigPath = asset('storage/uploads/sig/' . $clientId . $get_sig->getClientOriginalName());
+        $imgPath = asset('storage/uploads/img/' . $clientId . $get_img->getClientOriginalName());
+
         $field_req = 'required|min:2';
         $validator = Validator::make($request->all(), [
             'first_name' => $field_req,
@@ -78,8 +104,6 @@ class ClientController extends Controller
             'contact_number' => $field_req,
             'email_address' => 'required|email|min:2',
             'maintenance' => $field_req,
-            'signature' => 'required|min:5',
-            'image' => 'required|min:5',
         ]);
 
         $errors = $validator->errors();
@@ -110,8 +134,8 @@ class ClientController extends Controller
         $client->facebook = $request->facebook;
         $client->instagram = $request->instagram;
         $client->maintenance = $request->maintenance;
-        $client->signature = $request->signature;
-        $client->image = $request->image;
+        $client->signature = $sigPath;
+        $client->image = $imgPath;
         $client->added_by = $request->user()->id;
 
         if ($client->save()) {
