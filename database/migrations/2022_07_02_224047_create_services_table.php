@@ -18,7 +18,7 @@ return new class extends Migration
             $table->text('service_name');
             $table->text('service_description');
             $table->integer('availability');
-            $table->text('not_available_text');
+            $table->text('not_available_text')->nullable();
             $table->integer('price');
             $table->timestamps();
         });

@@ -45,7 +45,6 @@ class ServiceController extends Controller
             "service_name" => $val_req,
             "service_description" => $val_req,
             "availability" => $val_is_req,
-            "not_available_text" => $val_req,
             "price" => $val_is_req
         ]);
 
@@ -94,16 +93,12 @@ class ServiceController extends Controller
     public function update(Request $request, Service $service)
     {
         //
-        $val_req = "required|min:3";
-        $val_is_req = "required";
-        $this->validate($request, [
-            "service_name" => $val_req,
-            "service_description" => $val_req,
-            "availability" => $val_is_req,
-            "not_available_text" => $val_req,
-            "price" => $val_is_req
-        ]);
-
+        if (empty($request->service_name) && $request->service_description && $request->availability && $request->price) {
+            return response()->json([
+                "success" => false,
+                "message" => "Cannot submit empty in every fields."
+            ], 422);
+        }
         $service->service_name = $request->service_name;
         $service->service_description = $request->service_description;
         $service->availability = $request->availability;
