@@ -63,4 +63,36 @@ class ServiceReportConfigurationController extends Controller
             ], 400);
         }
     }
+
+    public function destroy($id)
+    {
+        $src = ServiceReportConfiguration::find($id);
+
+        try {
+            if (!empty($src)) {
+                if ($src->delete()) {
+                    return response()->json([
+                        "success" => true,
+                        "message" => "Service report configuration deleted"
+                    ], 200);
+                } else {
+                    return response()->json([
+                        "success" => false,
+                        "message" => "Service report configuration is NOT deleted"
+                    ], 400);
+                }
+            } else {
+                return response()->json([
+                    "success" => false,
+                    "message" => "Service report configuration NOT found"
+                ], 404);
+            }
+        } catch (\Throwable $th) {
+            throw response()->json([
+                "success" => false,
+                "message" => "Something went wrong",
+                "error" => $th,
+            ], 400);
+        }
+    }
 }

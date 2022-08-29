@@ -24,8 +24,8 @@ class VisitController extends Controller
             ->leftJoin('clients', 'visits.client_id', '=', 'clients.id')
             ->leftJoin('visit_types', 'visits.visit_type', '=', 'visit_types.id')
             ->leftJoin('discounts', 'visits.discount_type', '=', 'discounts.id')
-            ->leftJoin('users as hd', 'visits.hd_representative', '=', 'hd.id')
-            ->leftJoin('users as wc', 'visits.wc_representative', '=', 'wc.id')
+            ->leftJoin('user_profiles as hd', 'visits.hd_representative', '=', 'hd.user_id')
+            ->leftJoin('user_profiles as wc', 'visits.wc_representative', '=', 'wc.user_id')
             ->select('visits.*', 'clients.first_name', 'clients.middle_name', 'clients.last_name', 'clients.client_id', 'visit_types.type_name', 'discounts.discount_name', 'discounts.discount_type', 'discounts.discount_amount', 'hd.first_name as hd_first_name', 'hd.last_name as hd_last_name', 'wc.first_name as wc_first_name', 'wc.last_name as wc_last_name', 'clients.image')
             ->get();
 
@@ -123,8 +123,8 @@ class VisitController extends Controller
             ->leftJoin('clients', 'visits.client_id', '=', 'clients.id')
             ->leftJoin('visit_types', 'visits.visit_type', '=', 'visit_types.id')
             ->leftJoin('discounts', 'visits.discount_type', '=', 'discounts.id')
-            ->leftJoin('users as hd', 'visits.hd_representative', '=', 'hd.id')
-            ->leftJoin('users as wc', 'visits.wc_representative', '=', 'wc.id')
+            ->leftJoin('user_profiles as hd', 'visits.hd_representative', '=', 'hd.user_id')
+            ->leftJoin('user_profiles as wc', 'visits.wc_representative', '=', 'wc.user_id')
             ->where('visits.id', '=', $visit->id)
             ->select('visits.*', 'clients.id as client', 'clients.first_name', 'clients.middle_name', 'clients.last_name', 'clients.client_id', 'visit_types.type_name', 'discounts.discount_name', 'discounts.discount_type', 'discounts.discount_amount as discount_discount_amount', 'hd.first_name as hd_first_name', 'hd.last_name as hd_last_name', 'wc.first_name as wc_first_name', 'wc.last_name as wc_last_name', 'clients.image')
             ->get();

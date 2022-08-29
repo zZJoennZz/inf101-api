@@ -23,7 +23,7 @@ return new class extends Migration
             $table->unsignedBigInteger('visit_type');
             $table->decimal('visit_type_fee');
             $table->decimal('subtotal');
-            $table->unsignedBigInteger('discount_type');
+            $table->unsignedBigInteger('discount_type')->nullable()->default(0);
             $table->decimal('discount_amount');
             $table->decimal('discount_type_others');
             $table->text('discount_others');

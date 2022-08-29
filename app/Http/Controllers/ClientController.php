@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Client;
 
@@ -41,6 +43,16 @@ class ClientController extends Controller
     {
         $client = Client::find($id);
 
+        $visits = DB::table('visits')
+            ->leftJoin('clients', 'visits.client_id', '=', 'clients.id')
+            ->leftJoin('visit_types', 'visits.visit_type', '=', 'visit_types.id')
+            ->leftJoin('discounts', 'visits.discount_type', '=', 'discounts.id')
+            ->leftJoin('user_profiles as hd', 'visits.hd_representative', '=', 'hd.id')
+            ->leftJoin('user_profiles as wc', 'visits.wc_representative', '=', 'wc.id')
+            ->select('visits.*', 'clients.first_name', 'clients.middle_name', 'clients.last_name', 'clients.client_id', 'visit_types.type_name', 'discounts.discount_name', 'discounts.discount_type', 'discounts.discount_amount', 'hd.first_name as hd_first_name', 'hd.last_name as hd_last_name', 'wc.first_name as wc_first_name', 'wc.last_name as wc_last_name', 'clients.image')
+            ->where('clients.id', '=', $id)
+            ->get();
+
         if (json_encode($client) === json_encode([]) || is_null($client)) {
             return response()->json([
                 "success" => false,
@@ -50,43 +62,37 @@ class ClientController extends Controller
 
         return response()->json([
             "success" => true,
-            "data" => $client
+            "data" => $client,
+            "visit" => $visits
         ], 200);
     }
 
     public function store(Request $request)
     {
-        if (!$request->hasFile('sig')) {
+        if (!$request->hasFile('sig') || !$request->hasFile('image')) {
             return response()->json([
                 "success" => false,
-                "message" => "No signature image attached"
+                "message" => "No signature/picture image attached"
             ], 400);
         }
-
-        if (!$request->hasFile('image')) {
-            return response()->json([
-                "success" => false,
-                "message" => "No client image attached"
-            ], 400);
-        }
-
-        $sigStorePath = "public/uploads/sig";
-        $imgStorePath = "public/uploads/img";
-
-        $get_sig = $request->file('sig');
-        $get_img = $request->file('image');
 
         $client = Client::orderBy('id', 'desc')->first();
+
         $clientId = "";
         if (is_null($client)) {
             $clientId = "101-01";
         } else {
             $clientId = $client->id >= 10 ? "101-" . $client->id + 1 : "101-0" . $client->id + 1;
         }
-        $get_sig->storeAs($sigStorePath, $clientId . $get_sig->getClientOriginalName());
-        $get_img->storeAs($imgStorePath, $clientId . $get_img->getClientOriginalName());
-        $sigPath = asset('storage/uploads/sig/' . $clientId . $get_sig->getClientOriginalName());
-        $imgPath = asset('storage/uploads/img/' . $clientId . $get_img->getClientOriginalName());
+
+        $imgStorePath = "uploads/img";
+        $sigStorePath = "uploads/sig";
+
+        $get_img = $request->file('image');
+        $get_sig = $request->file('sig');
+
+        $imgFileName = $get_img->store($imgStorePath, "public");
+        $sigFileName = $get_sig->store($sigStorePath, "public");
 
         $field_req = 'required|min:2';
         $validator = Validator::make($request->all(), [
@@ -134,8 +140,8 @@ class ClientController extends Controller
         $client->facebook = $request->facebook;
         $client->instagram = $request->instagram;
         $client->maintenance = $request->maintenance;
-        $client->signature = $sigPath;
-        $client->image = $imgPath;
+        $client->signature = $sigFileName;
+        $client->image = $imgFileName;
         $client->added_by = $request->user()->id;
 
         if ($client->save()) {
@@ -180,6 +186,16 @@ class ClientController extends Controller
     public function destroy($id)
     {
         $client = Client::find($id);
+        $public = 'public/';
+        if (Storage::exists($public . $client->image) && Storage::exists($public . $client->signature)) {
+            Storage::delete($public . $client->image);
+            Storage::delete($public . $client->signature);
+        } else {
+            return response()->json([
+                "success" => false,
+                "message" => "Client profile could NOT be deleted. Image and signature file not found"
+            ], 400);
+        }
 
         if (is_null($client)) {
             return response()->json([
